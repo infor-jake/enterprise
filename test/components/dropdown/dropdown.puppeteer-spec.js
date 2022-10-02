@@ -1,5 +1,170 @@
+const { getConfig } = require('../../helpers/e2e-utils.js');
+
 describe('Dropdown Puppeteer Tests', () => {
   const baseUrl = 'http://localhost:4000/components/dropdown';
+
+  describe('Index', () => {
+    const url = `${baseUrl}/example-index`;
+
+    beforeAll(async () => {
+      await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    });
+
+    it('should show the title', async () => {
+      await expect(page.title()).resolves.toMatch('IDS Enterprise');
+    });
+
+    it('should render without error', async () => {
+      const dropDownEl = await page.$('#custom-dropdown-id-1-dropdown');
+      await dropDownEl.click();
+      
+      await page.waitForSelector('.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+    });
+
+    it('should be able to select next element', async () => {
+      const dropDownEl = await page.$('#custom-dropdown-id-1-dropdown');
+      await dropDownEl.click();
+      
+      await page.waitForSelector('.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      expect(await page.$eval('#custom-dropdown-id-1-dropdown', el => el.getAttribute('aria-label'))).toBe('State, New Jersey');
+
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('Enter');
+
+      expect(await page.$eval('#custom-dropdown-id-1-dropdown', el => el.getAttribute('aria-label'))).toBe('State, New Mexico');
+    });
+
+    it('should be able to set id/automation id', async () => {
+      const dropDownEl = await page.$('#custom-dropdown-id-1-dropdown');
+      await dropDownEl.click();
+      
+      await page.waitForSelector('.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      expect(await page.$eval('#custom-dropdown-id-1', el => el.getAttribute('id'))).toBe('custom-dropdown-id-1');
+      expect(await page.$eval('#custom-dropdown-id-1', el => el.getAttribute('data-automation-id'))).toBe('custom-automation-dropdown-id');
+
+      expect(await page.$eval('#custom-dropdown-id-1-search', el => el.getAttribute('id'))).toBe('custom-dropdown-id-1-search');
+      expect(await page.$eval('#custom-dropdown-id-1-search', el => el.getAttribute('data-automation-id'))).toBe('custom-automation-dropdown-id-search');
+
+      expect(await page.$eval('#custom-dropdown-id-1-search-label', el => el.getAttribute('id'))).toBe('custom-dropdown-id-1-search-label');
+      expect(await page.$eval('#custom-dropdown-id-1-search-label', el => el.getAttribute('data-automation-id'))).toBe('custom-automation-dropdown-id-search-label');
+
+      expect(await page.$eval('#custom-dropdown-id-1-dropdown', el => el.getAttribute('id'))).toBe('custom-dropdown-id-1-dropdown');
+      expect(await page.$eval('#custom-dropdown-id-1-dropdown', el => el.getAttribute('data-automation-id'))).toBe('custom-automation-dropdown-id-dropdown');
+
+      expect(await page.$eval('#custom-dropdown-id-1-trigger', el => el.getAttribute('id'))).toBe('custom-dropdown-id-1-trigger');
+      expect(await page.$eval('#custom-dropdown-id-1-trigger', el => el.getAttribute('data-automation-id'))).toBe('custom-automation-dropdown-id-trigger');
+
+      expect(await page.$eval('#custom-dropdown-id-1-listbox', el => el.getAttribute('id'))).toBe('custom-dropdown-id-1-listbox');
+      expect(await page.$eval('#custom-dropdown-id-1-listbox', el => el.getAttribute('data-automation-id'))).toBe('custom-automation-dropdown-id-listbox');
+
+      expect(await page.$eval('#custom-dropdown-id-1-option-0', el => el.getAttribute('id'))).toBe('custom-dropdown-id-1-option-0');
+      expect(await page.$eval('#custom-dropdown-id-1-option-0', el => el.getAttribute('data-automation-id'))).toBe('custom-automation-dropdown-id-option-0');
+    });
+
+    it('should not visual regress', async () => {
+      const dropDownEl = await page.$('#custom-dropdown-id-1-dropdown');
+      await dropDownEl.click();
+      
+      await page.waitForSelector('.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      const image = await page.screenshot();
+      const config = getConfig('dropdown-index');
+      await page.reload({ waitUntil: ['domcontentloaded', 'networkidle0'] });
+      expect(image).toMatchImageSnapshot(config);
+    });
+  });
+
+  describe('Ajax', () => {
+    const url = `${baseUrl}/example-ajax`;
+
+    beforeAll(async () => {
+      await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    });
+
+    it('should show the title', async () => {
+      await expect(page.title()).resolves.toMatch('IDS Enterprise');
+    });
+
+    it('should render without error', async () => {
+      const dropDownEl = await page.$('div.dropdown');
+      await dropDownEl.click();
+      
+      await page.waitForSelector('.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+    });
+
+    it('should be able to select next element from ajax', async () => {
+      const dropDownEl = await page.$('div.dropdown');
+      await dropDownEl.click();
+      
+      await page.waitForSelector('.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      expect(await page.$eval('div.dropdown', el => el.getAttribute('aria-label'))).toBe('Ajax Test, ');
+
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('Enter');
+
+      expect(await page.$eval('div.dropdown', el => el.getAttribute('aria-label'))).toBe('Ajax Test, American Samoa');
+    });
+  });
+
+  describe('No Search LSF', () => {
+    const url = `${baseUrl}/example-no-search-lsf`;
+
+    beforeAll(async () => {
+      await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    });
+
+    it('should show the title', async () => {
+      await expect(page.title()).resolves.toMatch('IDS Enterprise');
+    });
+
+    it('should render without error', async () => {
+      const dropDownEl = await page.$('div.dropdown');
+      await dropDownEl.click();
+      
+      await page.waitForSelector('.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+    });
+
+    it('should select a Dropdown item when keying on a closed Dropdown component', async () => {
+      const dropDownEl = await page.$('div.dropdown');
+      await dropDownEl.click();
+      
+      await page.waitForSelector('.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      expect(await page.$eval('div.dropdown', el => el.getAttribute('aria-label'))).toBe('No-Search Dropdown, , ');
+
+      await page.keyboard.press('R');
+      await page.keyboard.press('Enter');
+
+      expect(await page.$eval('div.dropdown', el => el.getAttribute('aria-label'))).toBe('No-Search Dropdown, R - Rocket Raccoon');
+    });
+
+    it('should cycle through dropdown options that begin with the same character', async () => {
+      const dropDownEl = await page.$('div.dropdown');
+      await dropDownEl.click();
+      
+      await page.waitForSelector('.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      await page.keyboard.press('T');
+      await page.keyboard.press('T');
+
+      // cont
+      expect(await page.$eval('li.dropdown-option.is-focused', el => el.innerText)).toBe('T - Thor');
+    });
+  });
+
   describe('Disabling Function Keys Tests', () => {
     const url = `${baseUrl}/test-disabling-function-keys`;
 
