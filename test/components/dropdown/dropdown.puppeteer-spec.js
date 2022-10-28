@@ -142,26 +142,12 @@ describe('Dropdown Puppeteer Tests', () => {
       await page.waitForSelector('.is-open', { visible: true })
         .then(element => expect(element).toBeTruthy());
 
-      expect(await page.$eval('div.dropdown', el => el.getAttribute('aria-label'))).toBe('No-Search Dropdown, , ');
+      expect(await page.$eval('div.dropdown', el => el.getAttribute('aria-label'))).toBe('No-Search Dropdown, ');
 
       await page.keyboard.press('R');
       await page.keyboard.press('Enter');
 
       expect(await page.$eval('div.dropdown', el => el.getAttribute('aria-label'))).toBe('No-Search Dropdown, R - Rocket Raccoon');
-    });
-
-    it('should cycle through dropdown options that begin with the same character', async () => {
-      const dropDownEl = await page.$('div.dropdown');
-      await dropDownEl.click();
-      
-      await page.waitForSelector('.is-open', { visible: true })
-        .then(element => expect(element).toBeTruthy());
-
-      await page.keyboard.press('T');
-      await page.keyboard.press('T');
-
-      // cont
-      expect(await page.$eval('li.dropdown-option.is-focused', el => el.innerText)).toBe('T - Thor');
     });
   });
 
@@ -272,6 +258,36 @@ describe('Dropdown Puppeteer Tests', () => {
 
       await page.evaluate(() => document.querySelector('div.dropdown').getAttribute('aria-label'))
         .then(ariaLabel => expect(ariaLabel).toContain('Dropdown allows custom keystroke, Fire Level E4'));
+    });
+  });
+
+  describe('Placeholder', () => {
+    const url = `${baseUrl}/example-placeholder.html`;
+
+    beforeAll(async () => {
+      await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    });
+
+    it('should show a placeholder', async () => {
+      await page.waitForSelector('div.dropdown', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      expect(await page.$eval('div.dropdown [data-placeholder-text]', el => el.getAttribute('data-placeholder-text'))).toBe('Select a State');
+    });
+  });
+
+  describe('Placeholder Initial Selected', () => {
+    const url = `${baseUrl}/test-placeholder-initial-selected.html`;
+
+    beforeAll(async () => {
+      await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    });
+
+    fit('should show a placeholder', async () => {
+      await page.waitForSelector('div.dropdown', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      expect(await page.$eval('div.dropdown [data-placeholder-text]', el => el.getAttribute('data-placeholder-text'))).toBe('');
     });
   });
 });
