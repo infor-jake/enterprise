@@ -1,4 +1,5 @@
 /* eslint-disable compat/compat */
+const path = require('path');
 const { getConfig, getComputedStyle } = require('../../helpers/e2e-utils.js');
 
 describe('Datagrid', () => {
@@ -55,6 +56,32 @@ describe('Datagrid', () => {
     });
   });
 
+  describe('Inline Editor', () => {
+    const url = `${baseUrl}/test-editable-with-inline-editor.html`;
+
+    beforeAll(async () => {
+      await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    });
+
+    it('Should have inline editors', async () => {
+      await page.waitForSelector('.has-inline-editor', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+    });
+
+    it('Should be able to clean editors on click and backspace', async () => {
+      await page.waitForSelector('.has-inline-editor', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      await page.waitForSelector('#datagrid-inline-input-1-2', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      await page.click('#datagrid-inline-input-1-2');
+
+      await page.keyboard.press('Backspace');
+      expect(await page.$eval('#datagrid-inline-input-1-2', el => el.value)).toBe('');
+    });
+  });
+
   describe('Tree row status', () => {
     const url = `${baseUrl}/test-tree-rowstatus.html`;
     beforeAll(async () => {
@@ -82,6 +109,33 @@ describe('Datagrid', () => {
 
       const status = await page.waitForSelector('tr.datagrid-row.datagrid-tree-child.rowstatus-row-info', { visible: true });
       expect(status).toBeTruthy();
+    });
+  });
+
+  describe('Tree Filter Empty', () => {
+    const url = `${baseUrl}/test-tree-filter.html`;
+
+    beforeAll(async () => {
+      await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    });
+
+    it('should be able to use filter empty without text in input box', async () => {
+      expect(await page.$$eval('tr.datagrid-row', el => el.length)).toEqual(22);
+
+      const filterBtn = await page.$('#test-tree-filter-datagrid-1-header-3 .btn-filter');
+      await filterBtn.click();
+
+      await page.waitForSelector('.popupmenu.is-open', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      await page.waitForSelector('.popupmenu.is-open li.is-empty', { visible: true })
+        .then(element => expect(element).toBeTruthy());
+
+      const isEmptyBtn = await page.$('.popupmenu.is-open li.is-empty');
+      await isEmptyBtn.click();
+
+      expect(await page.$$eval('tr.datagrid-row.is-hidden', el => el.length)).toEqual(7);
+      expect(await page.$$eval('tr.datagrid-row:not(.is-hidden)', el => el.length)).toEqual(1);
     });
   });
 
@@ -227,11 +281,13 @@ describe('Datagrid', () => {
       await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
     });
 
-    it('should not have aria-describedby attribute at cells', async () => {
-      await page.evaluate(async () => {
-        const cells = await document.querySelectorAll('.datagrid body tr td');
-        cells.forEach(cell => expect(cell.getAttribute('aria-describedby')).toBe(null));
-      });
+    it('should override the aria-describedby value', async () => {
+      const ariaDesc = await page.$$eval('tbody[role="rowgroup"] td[role="gridcell"]:nth-child(2)',
+        e => e.map(el => el.getAttribute('aria-describedby')));
+
+      for (let i = 0; i < ariaDesc.length; i++) {
+        expect(ariaDesc).toContain(`test-landmark-datagrid-${i + 1}-header-1`);
+      }
     });
   });
 
@@ -370,6 +426,79 @@ describe('Datagrid', () => {
           return elHandle.evaluate(e => e.getAttribute('style'));
         })
         .then(style => expect(style).toContain('width'));
+    });
+  });
+
+  describe('Allow beforeCommitCellEdit event test', () => {
+    const url = `${baseUrl}/test-editable-fileupload-before-commitcelledit`;
+    const fileName = 'test.txt';
+    const filePath = path.resolve(__dirname, fileName);
+    const uploadFiles = async (filePathArr) => {
+      const [fileChooser] = await Promise.all([
+        page.waitForFileChooser(),
+        page.click('#datagrid  table > tbody > tr:nth-child(1) > td.datagrid-trigger-cell.is-fileupload.has-editor > div > svg')
+      ]);
+      return fileChooser.accept(filePathArr);
+    };
+
+    beforeAll(async () => {
+      await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    });
+
+    it('should upload a file and show a fake path', async () => {
+      await uploadFiles([filePath]);
+      await page.waitForSelector('.icon-close', { visible: true });
+      await page.waitForSelector('table > tbody > tr:nth-child(1) > td.datagrid-trigger-cell.is-fileupload.has-editor > div', { visible: true })
+        .then(async (element) => {
+          const fakePath = await element.$eval('#datagrid > div.datagrid-wrapper.center.scrollable-x.scrollable-y > table > tbody > tr:nth-child(1) > td.datagrid-trigger-cell.is-fileupload.has-editor > div > span', e => e.textContent);
+          expect(fakePath).toEqual(`C:\\fakepath\\${fileName}`);
+        });
+    });
+  });
+
+  describe('Edit cells', () => {
+    const url = `${baseUrl}/example-editable`;
+
+    it('should update number to correct value in different locale', async () => {
+      const localeUrl = `${url}?locale=de-DE`;
+      await page.goto(localeUrl, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+
+      const priceCell = await page.$('#datagrid table > tbody > tr:nth-child(1) > td:nth-child(7)');
+      await priceCell.click();
+      await priceCell.type('1,5');
+      await page.keyboard.press('Enter');
+      await priceCell.evaluate(el => el.textContent).then(text => expect(text).toEqual('1,500'));
+
+      await priceCell.click();
+      await page.keyboard.press('Enter');
+      await priceCell.evaluate(el => el.textContent).then(text => expect(text).toEqual('1,500'));
+    });
+  });
+
+  describe('Extra class for tooltip tests', () => {
+    const url = `${baseUrl}/example-header-icon-with-tooltip`;
+
+    beforeAll(async () => {
+      await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
+    });
+
+    it('should show tooltip when hovered', async () => {
+      const th = 'example-header-icon-with-tooltip-datagrid-1-header-2';
+      await page.hover(`#${th}`);
+
+      await page.waitForSelector('#example-header-icon-with-tooltip-datagrid-0tooltip', { visible: true })
+        .then(element => element.getProperty('className'))
+        .then(className => className.jsonValue())
+        .then(classNameString => expect(classNameString).not.toContain('is-hidden'));
+    });
+
+    it('should show tooltip when hovered', async () => {
+      await page.hover('.icon.datagrid-header-icon');
+
+      await page.waitForSelector('#example-header-icon-with-tooltip-datagrid-0tooltip', { visible: true })
+        .then(element => element.getProperty('className'))
+        .then(className => className.jsonValue())
+        .then(classNameString => expect(classNameString).toContain('tooltip-extra-class'));
     });
   });
 });
