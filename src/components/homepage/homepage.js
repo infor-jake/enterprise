@@ -92,9 +92,9 @@ Homepage.prototype = {
     this.isTransitionsSupports = this.supportsTransitions();
     this.setSmall();
     this.setColumns();
-    this.initHeroWidget();
-    this.handleEvents();
-    this.initEdit();
+    // this.initHeroWidget();
+    // this.handleEvents();
+    // this.initEdit();
 
     // Initial Sizing
     this.resize(this, false);
@@ -237,6 +237,7 @@ Homepage.prototype = {
         }
       });
 
+      var crt;
       cards
         .on('mouseenter.card', function () {
           const card = $(this);
@@ -334,15 +335,17 @@ Homepage.prototype = {
           }
           card.removeClass('editable-hover-border');
         })
-        .on('dragstart.card', function () {
+        .on('dragstart.card', function (event) {
           const card = $(this);
           card.addClass('is-dragging');
           card.css('opacity', '0.99');
         })
-        .on('dragover.card', (event) => {
+        .on('drag.card', (event) => {
+        })
+        .on('dragover.card', (e) => {
           // For mac chrome/safari to remove animation
           // https://stackoverflow.com/questions/32206010/disable-animation-for-drag-and-drop-chrome-safari
-          event.preventDefault();
+          e.preventDefault();
         })
         .on('dragenter.card', function (event) {
           event.preventDefault();
@@ -400,7 +403,7 @@ Homepage.prototype = {
   setEdit(edit) {
     if (edit !== undefined) {
       this.editing = edit;
-      this.initEdit();
+      // this.initEdit();
       this.refresh(false);
     }
   },
