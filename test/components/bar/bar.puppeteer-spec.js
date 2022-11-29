@@ -1,7 +1,10 @@
-const { checkDataAutomationID, checkTooltipValue, checkClassNameValue, getConfig } = require('../../helpers/e2e-utils.js');
+const { checkDataAutomationID, checkTooltipValue, getConfig } = require('../../helpers/e2e-utils.js');
 
 describe('Bar Chart', () => {
   const baseUrl = 'http://localhost:4000/components/bar';
+
+  const checkClassName = (selector, value) => page.$eval(selector, element => element.getAttribute('class'))
+    .then(className => expect(className).toBe(value));
 
   describe('Bar Chart Disable Selection State Tests', () => {
     const url = `${baseUrl}/example-disable-selection-state.html`;
@@ -60,25 +63,25 @@ describe('Bar Chart', () => {
 
       await page.click('#bar-a-bar');
       await page.waitForTimeout(100);
-      isFailed.push(await checkClassNameValue(barA, 'bar series-0'));
-      isFailed.push(await checkClassNameValue(barB, 'bar series-1'));
-      isFailed.push(await checkClassNameValue(barC, 'bar series-2'));
+      isFailed.push(await checkClassName(barA, 'bar series-0'));
+      isFailed.push(await checkClassName(barB, 'bar series-1'));
+      isFailed.push(await checkClassName(barC, 'bar series-2'));
       await page.click('#bar-a-bar');
       await page.waitForTimeout(100);
 
       await page.click('#bar-b-bar');
       await page.waitForTimeout(100);
-      isFailed.push(await checkClassNameValue(barA, 'bar series-0'));
-      isFailed.push(await checkClassNameValue(barB, 'bar series-1'));
-      isFailed.push(await checkClassNameValue(barC, 'bar series-2'));
+      isFailed.push(await checkClassName(barA, 'bar series-0'));
+      isFailed.push(await checkClassName(barB, 'bar series-1'));
+      isFailed.push(await checkClassName(barC, 'bar series-2'));
       await page.click('#bar-b-bar');
       await page.waitForTimeout(100);
 
       await page.click('#bar-c-bar');
       await page.waitForTimeout(100);
-      isFailed.push(await checkClassNameValue(barA, 'bar series-0'));
-      isFailed.push(await checkClassNameValue(barB, 'bar series-1'));
-      isFailed.push(await checkClassNameValue(barC, 'bar series-2'));
+      isFailed.push(await checkClassName(barA, 'bar series-0'));
+      isFailed.push(await checkClassName(barB, 'bar series-1'));
+      isFailed.push(await checkClassName(barC, 'bar series-2'));
       await page.click('#bar-c-bar');
       await page.waitForTimeout(100);
 
@@ -100,17 +103,13 @@ describe('Bar Chart', () => {
     });
 
     it('should have greyed out bars when not selected', async () => {
-      const barEl = await page.$$('.bar.series-0');
+      const barEl = await page.$('.bar.series-0');
 
-      await page.click('.bar.series-0');
+      await barEl.click();
 
-      await page.waitForSelector('.bar.series-0', { visible: true });
+      await page.waitForSelector('.bar.series-0.is-selected', { visible: true });
 
-      const hasClassname = await checkClassNameValue(barEl, 'is-selected');
-      expect(hasClassname).toBe(true);
-
-      await page.waitForTimeout(200);
-
+      await barEl.evaluate(e => e.getAttribute('class')).then(className => expect(className).toContain('is-selected'));
       expect(await page.$eval('.bar.series-1', e => getComputedStyle(e).opacity)).toBe('0.6');
     });
 

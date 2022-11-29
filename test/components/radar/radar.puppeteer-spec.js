@@ -1,8 +1,9 @@
-const { checkClassNameValue } = require('../../helpers/e2e-utils.js');
-
 describe('Radar Puppeteer Tests', () => {
   describe('Radar Disable Selection  State Tests', () => {
     const url = 'http://localhost:4000/components/radar/example-disable-selection-state.html';
+
+    const checkClassName = (selector, value) => page.$eval(selector, element => element.getAttribute('class'))
+      .then(className => expect(className).toBe(value));
 
     beforeAll(async () => {
       await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
@@ -20,25 +21,25 @@ describe('Radar Puppeteer Tests', () => {
       const nokia = '#radar-nokia-area';
       await page.click(iphone);
       await page.waitForTimeout(200);
-      isFailed.push(await checkClassNameValue(iphone, 'chart-radar-area'));
-      isFailed.push(await checkClassNameValue(samsung, 'chart-radar-area'));
-      isFailed.push(await checkClassNameValue(nokia, 'chart-radar-area'));
+      isFailed.push(await checkClassName(iphone, 'chart-radar-area'));
+      isFailed.push(await checkClassName(samsung, 'chart-radar-area'));
+      isFailed.push(await checkClassName(nokia, 'chart-radar-area'));
       await page.click(iphone);
       await page.waitForTimeout(200);
 
       await page.click(samsung);
       await page.waitForTimeout(200);
-      isFailed.push(await checkClassNameValue(iphone, 'chart-radar-area'));
-      isFailed.push(await checkClassNameValue(samsung, 'chart-radar-area'));
-      isFailed.push(await checkClassNameValue(nokia, 'chart-radar-area'));
+      isFailed.push(await checkClassName(iphone, 'chart-radar-area'));
+      isFailed.push(await checkClassName(samsung, 'chart-radar-area'));
+      isFailed.push(await checkClassName(nokia, 'chart-radar-area'));
       await page.click(samsung);
       await page.waitForTimeout(200);
 
       await page.click(nokia);
       await page.waitForTimeout(200);
-      isFailed.push(await checkClassNameValue(iphone, 'chart-radar-area'));
-      isFailed.push(await checkClassNameValue(samsung, 'chart-radar-area'));
-      isFailed.push(await checkClassNameValue(nokia, 'chart-radar-area'));
+      isFailed.push(await checkClassName(iphone, 'chart-radar-area'));
+      isFailed.push(await checkClassName(samsung, 'chart-radar-area'));
+      isFailed.push(await checkClassName(nokia, 'chart-radar-area'));
       await page.click(nokia);
       await page.waitForTimeout(200);
       expect(isFailed).not.toContain(true);
@@ -70,9 +71,9 @@ describe('Radar Puppeteer Tests', () => {
         }
         await page.click(`#radar-${brand}-legend-${index}`);
         await page.waitForTimeout(200);
-        isFailed.push(await checkClassNameValue(iphone, 'chart-radar-area'));
-        isFailed.push(await checkClassNameValue(samsung, 'chart-radar-area'));
-        isFailed.push(await checkClassNameValue(nokia, 'chart-radar-area'));
+        isFailed.push(await checkClassName(iphone, 'chart-radar-area'));
+        isFailed.push(await checkClassName(samsung, 'chart-radar-area'));
+        isFailed.push(await checkClassName(nokia, 'chart-radar-area'));
         await page.click(`#radar-${brand}-legend-${index}`);
         await page.waitForTimeout(200);
         index += 1;

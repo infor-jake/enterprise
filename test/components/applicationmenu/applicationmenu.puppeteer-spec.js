@@ -1,5 +1,5 @@
 /* eslint-disable compat/compat */
-const { dragAndDrop } = require('../../helpers/e2e-utils');
+const { dragAndDropElem } = require('../../helpers/e2e-utils');
 const { getConfig } = require('../../helpers/e2e-utils.js');
 
 describe('Application Menu Puppeteer Test', () => {
@@ -79,8 +79,9 @@ describe('Application Menu Puppeteer Test', () => {
     it.skip('should resize at middle of the page', async () => {
       const windowSize = await page.viewport();
       const location = [{ y: 0, x: windowSize.width / 2 }];
+      const resizer = await page.$('.resizer');
 
-      await dragAndDrop('.resizer', location);
+      await dragAndDropElem(resizer, location);
 
       // hamburger icon should be visible
       let hamburger = await page.waitForSelector('button#header-hamburger', { visible: true });
@@ -105,8 +106,9 @@ describe('Application Menu Puppeteer Test', () => {
     it.skip('should resize at the near end of the page', async () => {
       const windowSize = await page.viewport();
       const location = [{ y: 0, x: windowSize.width - (windowSize.width * 0.1) }];
+      const resizer = await page.$('.resizer');
 
-      await dragAndDrop('.resizer', location);
+      await dragAndDropElem(resizer, location);
 
       // hamburger icon should be visible
       let hamburger = await page.waitForSelector('button#header-hamburger', { visible: true });
@@ -131,8 +133,9 @@ describe('Application Menu Puppeteer Test', () => {
     it.skip('should save last resize', async () => {
       const windowSize = await page.viewport();
       const location = [{ y: 0, x: windowSize.width - (windowSize.width * 0.1) }];
+      const resizer = await page.$('.resizer');
 
-      await dragAndDrop('.resizer', location);
+      await dragAndDropElem(resizer, location);
 
       const menuSize = await checkVisibility('nav#application-menu', true).then(element => element.boundingBox());
 

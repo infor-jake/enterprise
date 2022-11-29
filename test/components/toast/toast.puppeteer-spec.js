@@ -1,4 +1,4 @@
-const { dragAndDrop } = require('../../helpers/e2e-utils.js');
+const { dragAndDropElem, dragElemToPoint } = require('../../helpers/e2e-utils.js');
 
 describe('Toast Puppeteer Tests', () => {
   describe('Toast Index Tests', () => {
@@ -203,7 +203,7 @@ Object {
       const ob = await toast1.boundingBox();
       const button1 = await page.$('#show-toast-message1');
       await page.waitForTimeout(500);
-      await dragAndDrop(toast1, button1);
+      await dragAndDropElem(toast1, button1);
       const db = await toast1.boundingBox();
       const toastXLocation = db.x + db.width / 2;
       const toastYLocation = db.y + db.height / 2;
@@ -220,9 +220,10 @@ Object {
       await page.waitForSelector('#toast-containertoast-some-another-uniqueid-usersettings-position', { visible: true });
       const toast2 = await page.$('#toast-containertoast-some-another-uniqueid-usersettings-position');
       const ob2 = await toast2.boundingBox();
-      const location = [{ x: 126, y: 9 }];
+      const location = { x: 126, y: 9 };
       await page.waitForTimeout(500);
-      await dragAndDrop('.toast', location);
+      const toast = await page.$('.toast');
+      await dragElemToPoint(toast, location);
       const db2 = await toast2.boundingBox();
 
       // verify if the second toast has moved to drop location

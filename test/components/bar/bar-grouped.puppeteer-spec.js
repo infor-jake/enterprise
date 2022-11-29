@@ -1,7 +1,9 @@
-const { checkClassNameValue, getConfig } = require('../../helpers/e2e-utils.js');
+const { getConfig } = require('../../helpers/e2e-utils.js');
 
 describe('Grouped Bar Chart Puppeteer Tests', () => {
   const baseUrl = 'http://localhost:4000';
+  const checkClassName = (selector, name) => page.$eval(selector, element => element.getAttribute('class'))
+    .then(className => expect(className).toBe(name));
 
   describe('Grouped Bar Chart Disable Selection State Tests', () => {
     const url = `${baseUrl}/components/bar-grouped/example-disable-selection-state.html`;
@@ -25,27 +27,27 @@ describe('Grouped Bar Chart Puppeteer Tests', () => {
       // Series A
       await page.click(seriesA);
       await page.waitForTimeout(100);
-      isFailed.push(await checkClassNameValue(seriesA, 'series-group'));
-      isFailed.push(await checkClassNameValue(seriesB, 'series-group'));
-      isFailed.push(await checkClassNameValue(seriesC, 'series-group'));
+      isFailed.push(await checkClassName(seriesA, 'series-group'));
+      isFailed.push(await checkClassName(seriesB, 'series-group'));
+      isFailed.push(await checkClassName(seriesC, 'series-group'));
       await page.click(seriesA);
       await page.waitForTimeout(100);
 
       // Series B
       await page.click(seriesB);
       await page.waitForTimeout(100);
-      isFailed.push(await checkClassNameValue(seriesA, 'series-group'));
-      isFailed.push(await checkClassNameValue(seriesB, 'series-group'));
-      isFailed.push(await checkClassNameValue(seriesC, 'series-group'));
+      isFailed.push(await checkClassName(seriesA, 'series-group'));
+      isFailed.push(await checkClassName(seriesB, 'series-group'));
+      isFailed.push(await checkClassName(seriesC, 'series-group'));
       await page.click(seriesB);
       await page.waitForTimeout(100);
 
       // Series C
       await page.click(seriesC);
       await page.waitForTimeout(100);
-      isFailed.push(await checkClassNameValue(seriesA, 'series-group'));
-      isFailed.push(await checkClassNameValue(seriesB, 'series-group'));
-      isFailed.push(await checkClassNameValue(seriesC, 'series-group'));
+      isFailed.push(await checkClassName(seriesA, 'series-group'));
+      isFailed.push(await checkClassName(seriesB, 'series-group'));
+      isFailed.push(await checkClassName(seriesC, 'series-group'));
       await page.click(seriesC);
       await page.waitForTimeout(100);
 
@@ -64,9 +66,9 @@ describe('Grouped Bar Chart Puppeteer Tests', () => {
         await eL.hover();
         await page.click(`[index-id="chart-legend-${index}"]`);
         await page.waitForTimeout(200);
-        isFailed.push(await checkClassNameValue(seriesA, 'series-group'));
-        isFailed.push(await checkClassNameValue(seriesB, 'series-group'));
-        isFailed.push(await checkClassNameValue(seriesC, 'series-group'));
+        isFailed.push(await checkClassName(seriesA, 'series-group'));
+        isFailed.push(await checkClassName(seriesB, 'series-group'));
+        isFailed.push(await checkClassName(seriesC, 'series-group'));
         await page.click(`[index-id="chart-legend-${index}"]`);
         await page.waitForTimeout(200);
         index += 1;
@@ -95,15 +97,10 @@ describe('Grouped Bar Chart Puppeteer Tests', () => {
     });
 
     it('should highlight when selected', async () => {
-      page.waitForSelector('.series-group:nth-child(-n+3)', { visible: true });
-
-      const seriesGroupEl = await page.$$('.series-group:nth-child(-n+3)');
-
-      await page.click('.series-group:nth-child(-n+3)');
-
-      const hasClassname = await checkClassNameValue(seriesGroupEl, 'is-selected');
-
-      expect(hasClassname).toBe(true);
+      const seriesGroupEl = await page.$('.series-group:nth-child(-n+3)');
+      await seriesGroupEl.click();
+      await page.waitForSelector('.series-group:nth-child(-n+3).is-selected', { visible: true });
+      await seriesGroupEl.evaluate(e => e.getAttribute('class')).then(className => expect(className).toContain('is-selected'));
     });
 
     it('should be able to set id/automation id', async () => {
@@ -243,13 +240,9 @@ describe('Grouped Bar Chart Puppeteer Tests', () => {
     });
 
     it('should be highlighted when selected', async () => {
-      page.waitForSelector('.group .series-group', { visible: true });
-
-      const fGroupEl = await page.$$('.group .series-group');
-
-      const hasClassname = await checkClassNameValue(fGroupEl, 'is-selected');
-
-      expect(hasClassname).toBe(true);
+      const elems = await page.$$('.group .series-group');
+      await elems[0].click();
+      await elems[0].evaluate(e => e.getAttribute('class')).then(className => expect(className).toContain('is-selected'));
     });
   });
 });

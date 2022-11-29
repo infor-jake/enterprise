@@ -1,8 +1,9 @@
-const { checkClassNameValue } = require('../../helpers/e2e-utils.js');
-
 describe('Line Puppeteer Tests', () => {
   describe('Line Disable Selection  State Tests', () => {
     const url = 'http://localhost:4000/components/line/example-disable-selection-state.html';
+
+    const checkClassName = selector => page.$eval(selector, element => element.getAttribute('class'))
+      .then(className => expect(className).toBe('line-group'));
 
     beforeAll(async () => {
       await page.goto(url, { waitUntil: ['domcontentloaded', 'networkidle0'] });
@@ -21,6 +22,7 @@ describe('Line Puppeteer Tests', () => {
       const lineA = '#line-example > svg > g > g:nth-child(3)';
       const lineB = '#line-example > svg > g > g:nth-child(4)';
       const lineC = '#line-example > svg > g > g:nth-child(5)';
+
       // eslint-disable-next-line no-restricted-syntax
       for await (const eL of elHandleArray) {
         let comp = '';
@@ -40,49 +42,49 @@ describe('Line Puppeteer Tests', () => {
         }
         await page.click(`#line-${comp}-jan-dot`);
         await page.waitForTimeout(200);
-        isFailed.push(await checkClassNameValue(lineA, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineB, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineC, 'line-group'));
+        isFailed.push(await checkClassName(lineA));
+        isFailed.push(await checkClassName(lineB));
+        isFailed.push(await checkClassName(lineC));
         await page.click(`#line-${comp}-jan-dot`);
         await page.waitForTimeout(200);
 
         await page.click(`#line-${comp}-feb-dot`);
         await page.waitForTimeout(200);
-        isFailed.push(await checkClassNameValue(lineA, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineB, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineC, 'line-group'));
+        isFailed.push(await checkClassName(lineA));
+        isFailed.push(await checkClassName(lineB));
+        isFailed.push(await checkClassName(lineC));
         await page.click(`#line-${comp}-feb-dot`);
         await page.waitForTimeout(200);
 
         await page.click(`#line-${comp}-mar-dot`);
         await page.waitForTimeout(200);
-        isFailed.push(await checkClassNameValue(lineA, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineB, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineC, 'line-group'));
+        isFailed.push(await checkClassName(lineA));
+        isFailed.push(await checkClassName(lineB));
+        isFailed.push(await checkClassName(lineC));
         await page.click(`#line-${comp}-mar-dot`);
         await page.waitForTimeout(200);
 
         await page.click(`#line-${comp}-apr-dot`);
         await page.waitForTimeout(200);
-        isFailed.push(await checkClassNameValue(lineA, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineB, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineC, 'line-group'));
+        isFailed.push(await checkClassName(lineA));
+        isFailed.push(await checkClassName(lineB));
+        isFailed.push(await checkClassName(lineC));
         await page.click(`#line-${comp}-apr-dot`);
         await page.waitForTimeout(200);
 
         await page.click(`#line-${comp}-may-dot`);
         await page.waitForTimeout(200);
-        isFailed.push(await checkClassNameValue(lineA, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineB, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineC, 'line-group'));
+        isFailed.push(await checkClassName(lineA));
+        isFailed.push(await checkClassName(lineB));
+        isFailed.push(await checkClassName(lineC));
         await page.click(`#line-${comp}-may-dot`);
         await page.waitForTimeout(200);
 
         await page.click(`#line-${comp}-jun-dot`);
         await page.waitForTimeout(200);
-        isFailed.push(await checkClassNameValue(lineA, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineB, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineC, 'line-group'));
+        isFailed.push(await checkClassName(lineA));
+        isFailed.push(await checkClassName(lineB));
+        isFailed.push(await checkClassName(lineC));
         await page.click(`#line-${comp}-jun-dot`);
         await page.waitForTimeout(200);
         index += 1;
@@ -116,9 +118,9 @@ describe('Line Puppeteer Tests', () => {
         }
         await page.click(`#line-comp-${comp}-legend-${index}`);
         await page.waitForTimeout(200);
-        isFailed.push(await checkClassNameValue(lineA, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineB, 'line-group'));
-        isFailed.push(await checkClassNameValue(lineC, 'line-group'));
+        isFailed.push(await checkClassName(lineA));
+        isFailed.push(await checkClassName(lineB));
+        isFailed.push(await checkClassName(lineC));
         await page.click(`#line-comp-${comp}-legend-${index}`);
         await page.waitForTimeout(200);
         index += 1;

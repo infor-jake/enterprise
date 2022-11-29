@@ -103,10 +103,11 @@ module.exports = {
   },
 
   /**
-     * Get the computed style of a particular element.
-     * param {string} selector - The selector for the element to get the property for.
-     * returns {string} style - The css property of the element.
-     */
+   * Get the computed style of a particular element.
+   * @param {string} selector selector - The selector for the element to get the property for.
+   * @param {string} style style - The css property of the element.
+   * @returns props
+   */
   getComputedStyle: async (selector, style) => {
     const elem = await page.$eval(selector, e => JSON.parse(JSON.stringify(getComputedStyle(e))));
     const { [style]: props } = elem;
@@ -120,6 +121,7 @@ module.exports = {
      * param {string} value - The value to compare. Expected Value.
      * returns {boolean} isFailed - return true if the comparison is failed, return false otherwise.
      */
+    // unecessary
   checkElementCssProperty: async (selector, style, value) => {
     let isFailed = false;
     try {
@@ -138,6 +140,7 @@ module.exports = {
      * param {string} value - The value to compare. Expected Value.
      * returns {boolean} isFailed - return true if the comparison is failed, return false otherwise.
      */
+    // unecessary
   checkDataAutomationID: async (selector, value) => {
     let isFailed = false;
     try {
@@ -156,6 +159,7 @@ module.exports = {
      * param {string} value - The value to compare. Expected Value.
      * returns {boolean} isFailed - return true if the comparison is failed, return false otherwise.
      */
+    // unecessary
   checkInnerHTMLValue: async (selector, value) => {
     let isFailed = false;
     try {
@@ -175,6 +179,7 @@ module.exports = {
      * param {string} expectedValue - The tooltip value to compare.
      * returns {boolean} isFailed - return true if the comparison is failed, return false otherwise.
      */
+    // unecessary
   checkTooltipValue: async (parentEL, tooltipEL, elHandle, expectedValue) => {
     let isFailed = false;
     try {
@@ -194,6 +199,7 @@ module.exports = {
      * param {string} selector - The selector for the element to get the property value for
      * returns {boolean} isFailed - return true if the comparison is failed, return false otherwise
      */
+    // maybe
   checkIfElementExist: async (selector) => {
     let isFailed = false;
     try {
@@ -210,6 +216,7 @@ module.exports = {
      * param {string} selector - The selector for the element.
      * returns {boolean} isFailed - return true if the comparison is failed, return false otherwise
      */
+    // unecessary
   checkIfElementHasFocused: async (selector) => {
     let isFailed = false;
     try {
@@ -222,85 +229,35 @@ module.exports = {
   },
 
   /**
-     * Checks if the Class Name of an element contains the given value.
-     * param {string} selector - The selector for the element.
-     * param {string} value - The value to compare. Expected Value.
-     * returns {boolean} isFailed - return true if the comparison is failed, return false otherwise.
-     */
-  checkClassNameValue: async (selector, value) => {
-    let isFailed = false;
-    try {
-      const elemHandle = await page.$(selector);
-      const elemID = await page.evaluate(elem => elem.getAttribute('class'), elemHandle);
-      expect(elemID).toEqual(value);
-    } catch (error) {
-      isFailed = true;
-    }
-    return isFailed;
+   * Drag and drop method using two elements as points
+   * @param {Object} origin Starting element
+   * @param {Object} destination Destination
+   * @returns {Object} Origin coordinates
+   */
+  dragAndDropElem: async (origin, destination) => {
+    const ob = await origin.boundingBox();
+    const db = await destination.boundingBox();
+    await page.mouse.move(ob.x + ob.width / 2, ob.y + ob.height / 2);
+    await page.mouse.down();
+    await page.waitForTimeout(50);
+    await page.mouse.move(db.x + db.width / 2, db.y + db.height / 2);
+    await page.mouse.up();
+    return { origin: ob, destination: db };
   },
 
   /**
-     * Drag and Drop element to a specific location.
-     * param {string} || {object} originSelector - The selector for the origin element. could be [object Object] or [object String]
-     * param {string} || {object} destinationSelector - The selector of the destination element. could be [object Object] or [object String] or [object Array]
-     * usage : dragAndDrop(selector, selector)
-     * usage : dragAndDrop('selector', 'selector')
-     * usage : dragAndDrop(selector, 'selector')
-     * usage : dragAndDrop(selector,[{x:100, y:50}])
-     */
-  dragAndDrop: async (originSelector, destinationSelector) => {
-    const getType = value => (Object.prototype.toString.call(value));
-    const DroptoElement = async () => {
-      await page.waitForSelector(originSelector);
-      await page.waitForSelector(destinationSelector);
-      const origin = await page.$(originSelector);
-      const destination = await page.$(destinationSelector);
-      const ob = await origin.boundingBox();
-      const db = await destination.boundingBox();
-
-      await page.mouse.move(ob.x + ob.width / 2, ob.y + ob.height / 2);
-      await page.mouse.down();
-      await page.mouse.move(db.x + db.width / 2, db.y + db.height / 2);
-      await page.mouse.up();
-    };
-    const DroptoLocation = async (x, y) => {
-      const element = await page.$(originSelector);
-      // eslint-disable-next-line camelcase
-      const bounding_box = await element.boundingBox();
-      await page.mouse.move(bounding_box.x + bounding_box.width / 2, bounding_box.y + bounding_box.height / 2);
-      await page.mouse.down();
-      await page.mouse.move(parseFloat(x), parseFloat(y));
-      await page.mouse.up();
-    };
-
-    switch (getType(destinationSelector)) {
-      case '[object String]':
-        await DroptoElement();
-        break;
-      case 'number':
-        await DroptoLocation();
-        break;
-      case '[object Array]':
-        // eslint-disable-next-line no-case-declarations
-        const { x } = destinationSelector[0];
-        // eslint-disable-next-line no-case-declarations
-        const { y } = destinationSelector[0];
-        await DroptoLocation(x, y);
-        break;
-      case '[object Object]':
-      default:
-        if ((getType(originSelector) === '[object Object]')) {
-          const origin = originSelector;
-          const destination = destinationSelector;
-          const ob = await origin.boundingBox();
-          const db = await destination.boundingBox();
-          await page.mouse.move(ob.x + ob.width / 2, ob.y + ob.height / 2);
-          await page.mouse.down();
-          await page.mouse.move(db.x + db.width / 2, db.y + db.height / 2);
-          await page.mouse.up();
-          break;
-        }
-        break;
-    }
-  },
+   * Drag and drop method using an element as the start and
+   * coordinates as the destination
+   * @param {Object} origin Starting element
+   * @param {Object} destination Coordinates = { x, y }
+   * @returns {Object} Origin coordinates
+   */
+  dragElemToPoint: async (origin, destination) => {
+    const boundingBox = await origin.boundingBox();
+    await page.mouse.move(boundingBox.x + boundingBox.width / 2, boundingBox.y + boundingBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(destination.x, destination.y);
+    await page.mouse.up();
+    return boundingBox;
+  }
 };
